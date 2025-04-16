@@ -81,85 +81,86 @@
     <ul id="llista-activitats">
       <!-- Les activitats s'afegiran aquí -->
     </ul>
-    
+
     <h2>Afegeix una nova activitat:</h2>
-    <!-- FORMULARI D'ENTRADA -->
-    <input id="actividad" placeholder="Nom de l'activitat" /><br><br>
-    <textarea id="descripcion" placeholder="Descripció de l'activitat"></textarea><br><br>
-    <button onclick="publicarActividad()">Publicar</button>
+    <form id="formulari">
+      <input id="titol" placeholder="Nom de l'activitat" required />
+      <textarea id="descripcio" placeholder="Descripció de l'activitat" required></textarea>
+      <button type="submit">Publicar</button>
+    </form>
   </main>
 
   <footer>
     © 2025 Activitats Sabadell
   </footer>
-<!-- Firebase v9 compatible con scripts normales -->
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
-<script>
-  // Configuración de Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyApjLEN68_QBOPLDhVxqjwHrRe9ut-7oPQ",
-    authDomain: "actsabadell-ea0ed.firebaseapp.com",
-    databaseURL: "https://actsabadell-ea0ed-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "actsabadell-ea0ed",
-    storageBucket: "actsabadell-ea0ed.firebasestorage.app",
-    messagingSenderId: "1001085224649",
-    appId: "1:1001085224649:web:4c6b1719e45d4bcfefef18",
-    measurementId: "G-SJF9LN4J44"
-  };
+  <!-- Firebase v9 compatible con scripts normales -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
-  // Inicializar Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+  <script>
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyApjLEN68_QBOPLDhVxqjwHrRe9ut-7oPQ",
+      authDomain: "actsabadell-ea0ed.firebaseapp.com",
+      databaseURL: "https://actsabadell-ea0ed-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "actsabadell-ea0ed",
+      storageBucket: "actsabadell-ea0ed.firebasestorage.app",
+      messagingSenderId: "1001085224649",
+      appId: "1:1001085224649:web:4c6b1719e45d4bcfefef18",
+      measurementId: "G-SJF9LN4J44"
+    };
 
-  const formulari = document.getElementById('formulari');
-  const llista = document.getElementById('llista-activitats');
-  const borrarActivitatsBtn = document.getElementById('borrar-activitats');
+    // Inicializar Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  // Cargar actividades desde Firebase
-  firebase.database().ref('activitats').on('value', (snapshot) => {
-    llista.innerHTML = ''; // Limpiar la lista antes de cargar
-    const activitats = snapshot.val();
-    for (const id in activitats) {
-      afegirActivitatALaLlista({ id, ...activitats[id] });
-    }
-  });
+    const formulari = document.getElementById('formulari');
+    const llista = document.getElementById('llista-activitats');
 
-  // Añadir una actividad a Firebase
-  formulari.addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    const titol = document.getElementById('titol').value.trim();
-    const descripcio = document.getElementById('descripcio').value.trim();
-
-    if (titol && descripcio) {
-      const novaActivitat = { titol, descripcio };
-      firebase.database().ref('activitats').push(novaActivitat); // Guardar en Firebase
-      formulari.reset();
-    }
-  });
-
-  // Función para añadir una actividad al DOM
-  function afegirActivitatALaLlista(activitat) {
-    const novaActivitat = document.createElement('li');
-    novaActivitat.innerHTML = `
-      <strong>${activitat.titol}</strong> – ${activitat.descripcio}
-      <button class="eliminar-activitat">Eliminar</button>
-    `;
-
-    // Añadir evento para eliminar la actividad
-    novaActivitat.querySelector('.eliminar-activitat').addEventListener('click', () => {
-      eliminarActivitat(activitat.id);
+    // Cargar actividades desde Firebase
+    firebase.database().ref('activitats').on('value', (snapshot) => {
+      llista.innerHTML = ''; // Limpiar la lista antes de cargar
+      const activitats = snapshot.val();
+      for (const id in activitats) {
+        afegirActivitatALaLlista({ id, ...activitats[id] });
+      }
     });
 
-    llista.appendChild(novaActivitat);
-  }
+    // Añadir una actividad a Firebase
+    formulari.addEventListener('submit', function(event) {
+      event.preventDefault();
 
-  // Eliminar una actividad de Firebase
-  function eliminarActivitat(id) {
-    firebase.database().ref(`activitats/${id}`).remove();
-  }
+      const titol = document.getElementById('titol').value.trim();
+      const descripcio = document.getElementById('descripcio').value.trim();
 
-  
-</script>
+      if (titol && descripcio) {
+        const novaActivitat = { titol, descripcio };
+        firebase.database().ref('activitats').push(novaActivitat); // Guardar en Firebase
+        formulari.reset();
+      }
+    });
+
+    // Función para añadir una actividad al DOM
+    function afegirActivitatALaLlista(activitat) {
+      const novaActivitat = document.createElement('li');
+      novaActivitat.innerHTML = `
+        <strong>${activitat.titol}</strong> – ${activitat.descripcio}
+        <button class="eliminar-activitat">Eliminar</button>
+      `;
+
+      // Añadir evento para eliminar la actividad
+      novaActivitat.querySelector('.eliminar-activitat').addEventListener('click', () => {
+        eliminarActivitat(activitat.id);
+      });
+
+      llista.appendChild(novaActivitat);
+    }
+
+    // Eliminar una actividad de Firebase
+    function eliminarActivitat(id) {
+      firebase.database().ref(`activitats/${id}`).remove();
+    }
+  </script>
+</body>
+</html>
