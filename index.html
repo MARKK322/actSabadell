@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activitats a Sabadell</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3f3f3;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #2b7e40;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    main {
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #2b7e37;
+    }
+    ul {
+      list-style: none;    
+      padding: 0;
+    }
+    li {
+      background: #e6ecf5;
+      margin: 10px 0;
+      padding: 10px;
+      border-left: 5px solid #2b4c7e;
+    }
+    form {
+      margin-top: 20px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    button {
+      background-color: #2b4c7e;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #1f3b62;
+    }
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #2b4c7e;
+      color: white;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Activitats Locals a Sabadell</h1>
+    <p>Descobreix què fer a la teva ciutat!</p>
+  </header>
+
+  <main>
+    <h2>Pròximes activitats:</h2>
+    <ul id="llista-activitats">
+      <!-- Les activitats s'afegiran aquí -->
+    </ul>
+
+    <h2>Afegeix una nova activitat:</h2>
+    <form id="formulari">
+      <input id="titol" placeholder="Nom de l'activitat" required />
+      <textarea id="descripcio" placeholder="Descripció de l'activitat" required></textarea>
+      <button type="submit">Publicar</button>
+    </form>
+  </main>
+
+  <footer>
+    © 2025 Activitats Sabadell
+  </footer>
+
+  <!-- Firebase v9 compatible con scripts normales -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+  <script>
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyApjLEN68_QBOPLDhVxqjwHrRe9ut-7oPQ",
+      authDomain: "actsabadell-ea0ed.firebaseapp.com",
+      databaseURL: "https://actsabadell-ea0ed-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "actsabadell-ea0ed",
+      storageBucket: "actsabadell-ea0ed.firebasestorage.app",
+      messagingSenderId: "1001085224649",
+      appId: "1:1001085224649:web:4c6b1719e45d4bcfefef18",
+      measurementId: "G-SJF9LN4J44"
+    };
+
+    // Inicializar Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const formulari = document.getElementById('formulari');
+    const llista = document.getElementById('llista-activitats');
+
+    // Cargar actividades desde Firebase
+    firebase.database().ref('activitats').on('value', (snapshot) => {
+      llista.innerHTML = ''; // Limpiar la lista antes de cargar
+      const activitats = snapshot.val();
+      for (const id in activitats) {
+        afegirActivitatALaLlista({ id, ...activitats[id] });
+      }
+    });
+
+    // Añadir una actividad a Firebase
+    formulari.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const titol = document.getElementById('titol').value.trim();
+      const descripcio = document.getElementById('descripcio').value.trim();
+
+      if (titol && descripcio) {
+        const novaActivitat = { titol, descripcio };
+        firebase.database().ref('activitats').push(novaActivitat); // Guardar en Firebase
+        formulari.reset();
+      }
+    });
+
+    // Función para añadir una actividad al DOM
+    function afegirActivitatALaLlista(activitat) {
+      const novaActivitat = document.createElement('li');
+      novaActivitat.innerHTML = `
+        <strong>${activitat.titol}</strong> – ${activitat.descripcio}
+        <button class="eliminar-activitat">Eliminar</button>
+      `;
+
+      // Añadir evento para eliminar la actividad
+      novaActivitat.querySelector('.eliminar-activitat').addEventListener('click', () => {
+        eliminarActivitat(activitat.id);
+      });
+
+      llista.appendChild(novaActivitat);
+    }
+
+    // Eliminar una actividad de Firebase
+    function eliminarActivitat(id) {
+      firebase.database().ref(`activitats/${id}`).remove();
+    }
+  </script>
+</body>
+</html>
