@@ -84,11 +84,10 @@
     <button id="borrar-activitats">Esborrar totes les activitats</button> <!-- Botó per esborrar activitats -->
 
     <h2>Afegeix una nova activitat:</h2>
-    <form id="formulari">
-      <input type="text" id="titol" placeholder="Títol de l'activitat" required>
-      <textarea id="descripcio" placeholder="Descripció, lloc i hora" required></textarea>
-      <button type="submit">Afegir activitat</button>
-    </form>
+   <!-- FORMULARI D'ENTRADA -->
+    <input id="actividad" placeholder="Nom de l'activitat" /><br><br>
+    <textarea id="descripcion" placeholder="Descripció de l'activitat"></textarea><br><br>
+    <button onclick="publicarActividad()">Publicar</button>
   </main>
 
   <footer>
