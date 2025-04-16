@@ -161,10 +161,5 @@
     firebase.database().ref(`activitats/${id}`).remove();
   }
 
-  // Borrar todas las actividades de Firebase
-  borrarActivitatsBtn.addEventListener('click', () => {
-    if (confirm('Estàs segur que vols esborrar totes les activitats?')) {
-      firebase.database().ref('activitats').remove();
-    }
-  });
+  
 </script>
