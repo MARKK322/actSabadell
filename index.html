@@ -12,30 +12,60 @@
       padding: 0;
     }
     header {
-      background-color: #2b7e40;
+      background-color: #34b253;
       color: white;
       padding: 20px;
       text-align: center;
+      position: relative;
+    }
+    .smileys-grid {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .smileys-grid img {
+      width: 48px;
+      height: 48px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    p {
+      margin: 10px 0 0;
+      font-size: 16px;
     }
     main {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
       padding: 20px;
-      max-width: 800px;
+      max-width: 1200px;
       margin: auto;
-      background-color: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .section {
+      flex: 1;
+      min-width: 300px;
+      background-color: rgb(217, 240, 214);
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(55, 223, 4, 0.1);
     }
     h2 {
       color: #2b7e37;
     }
     ul {
-      list-style: none;    
+      list-style: none;
       padding: 0;
     }
     li {
-      background: #e6ecf5;
+      background: #c4d4ec;
       margin: 10px 0;
       padding: 10px;
-      border-left: 5px solid #2b4c7e;
+      border-left: 5px solid #3870c4;
+    }
+    .descripcio {
+      white-space: pre-wrap; /* Respetar espacios y saltos de línea */
     }
     form {
       margin-top: 20px;
@@ -50,7 +80,7 @@
       font-size: 14px;
     }
     button {
-      background-color: #2b4c7e;
+      background-color: #425bfc;
       color: white;
       border: none;
       padding: 10px 20px;
@@ -59,35 +89,77 @@
       font-size: 16px;
     }
     button:hover {
-      background-color: #1f3b62;
+      background-color: #2666bf;
     }
     footer {
       text-align: center;
       padding: 10px;
-      background-color: #2b4c7e;
+      background-color: #c6e721;
       color: white;
       margin-top: 40px;
+    }
+    #map-container {
+      width: 100%;
+      max-width: 600px;
+      height: 400px;
+      margin: auto;
+    }
+    #map-image {
+      transition: transform 0.3s ease;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Activitats Locals a Sabadell</h1>
+    <div class="smileys-grid">
+      <img src="https://img.icons8.com/emoji/48/000000/smiling-face.png" alt="Cara sonriente">
+      <h1>Activitats Locals a Sabadell</h1>
+      <img src="https://img.icons8.com/emoji/48/000000/smiling-face.png" alt="Cara sonriente">
+    </div>
     <p>Descobreix què fer a la teva ciutat!</p>
   </header>
 
   <main>
-    <h2>Pròximes activitats:</h2>
-    <ul id="llista-activitats">
-      <!-- Les activitats s'afegiran aquí -->
-    </ul>
+    <!-- Sección de actividades -->
+    <div class="section">
+      <h2>Pròximes activitats:</h2>
+      <ul id="llista-activitats">
+        <!-- Les activitats s'afegiran aquí -->
+      </ul>
 
-    <h2>Afegeix una nova activitat:</h2>
-    <form id="formulari">
-      <input id="titol" placeholder="Nom de l'activitat" required />
-      <textarea id="descripcio" placeholder="Descripció de l'activitat" required></textarea>
-      <button type="submit">Publicar</button>
-    </form>
+      <h2>Afegeix una nova activitat:</h2>
+      <form id="formulari">
+        <input id="titol" placeholder="Nom de l'activitat" required />
+        <textarea id="descripcio" placeholder="Descripció de l'activitat" required></textarea>
+        <button type="submit">Publicar</button>
+      </form>
+    </div>
+
+    <!-- Sección de chat -->
+    <div class="section">
+      <h2>Chat</h2>
+      <ul id="llista-missatges">
+        <!-- Els missatges s'afegiran aquí -->
+      </ul>
+
+      <form id="formulari-chat">
+        <textarea id="cos" placeholder="Cos del missatge" required></textarea>
+        <button type="submit">Enviar</button>
+      </form>
+
+      <!-- Botón para eliminar todos los mensajes -->
+      <button id="eliminar-tots-missatges" style="margin-top: 20px; background-color: rgb(221, 40, 158); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Eliminar Todo</button>
+    </div>
+
+    <!-- Sección de mapa interactivo -->
+    <div class="section">
+      <h2>Mapa interactiu</h2>
+      <div id="map-container" style="position: relative; overflow: hidden; border: 1px solid #ccc;">
+        <img id="map-image" src="sbdearth.jpg" alt="Mapa" style="width: 100%; cursor: crosshair;" />
+      </div>
+      <button id="zoom-in" style="margin-top: 10px;">Zoom +</button>
+      <button id="zoom-out" style="margin-top: 10px;">Zoom -</button>
+    </div>
   </main>
 
   <footer>
@@ -117,6 +189,8 @@
 
     const formulari = document.getElementById('formulari');
     const llista = document.getElementById('llista-activitats');
+    const formulariChat = document.getElementById('formulari-chat');
+    const llistaMissatges = document.getElementById('llista-missatges');
 
     // Cargar actividades desde Firebase
     firebase.database().ref('activitats').on('value', (snapshot) => {
@@ -145,22 +219,139 @@
     function afegirActivitatALaLlista(activitat) {
       const novaActivitat = document.createElement('li');
       novaActivitat.innerHTML = `
-        <strong>${activitat.titol}</strong> – ${activitat.descripcio}
-        <button class="eliminar-activitat">Eliminar</button>
+        <strong>${activitat.titol}</strong>
+        <p class="descripcio">${activitat.descripcio}</p>
+        <p>Vots: <span class="vots">${activitat.vots || 0}</span></p>
+        <button class="votar-activitat">Votar per eliminar</button>
       `;
 
-      // Añadir evento para eliminar la actividad
-      novaActivitat.querySelector('.eliminar-activitat').addEventListener('click', () => {
-        eliminarActivitat(activitat.id);
+      // Añadir evento para votar
+      novaActivitat.querySelector('.votar-activitat').addEventListener('click', () => {
+        votarActivitat(activitat.id, activitat.vots || 0);
       });
 
       llista.appendChild(novaActivitat);
+    }
+
+    // Función para votar una actividad
+    function votarActivitat(id, votsActuals) {
+      const nousVots = votsActuals + 1;
+      firebase.database().ref(`activitats/${id}`).update({ vots: nousVots });
+
+      // Cambiar el número de votos necesarios a 6
+      if (nousVots >= 6) {
+        eliminarActivitat(id);
+      }
     }
 
     // Eliminar una actividad de Firebase
     function eliminarActivitat(id) {
       firebase.database().ref(`activitats/${id}`).remove();
     }
+
+    // Cargar mensajes del chat desde Firebase
+    firebase.database().ref('missatges').on('value', (snapshot) => {
+      llistaMissatges.innerHTML = ''; // Limpiar la lista antes de cargar
+      const missatges = snapshot.val();
+      for (const id in missatges) {
+        afegirMissatgeALaLlista({ id, ...missatges[id] });
+      }
+    });
+
+    // Añadir un mensaje al chat en Firebase
+    formulariChat.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const cos = document.getElementById('cos').value.trim();
+
+      if (cos) {
+        const nouMissatge = { cos, vots: 0 }; // Inicializar con 0 votos
+        firebase.database().ref('missatges').push(nouMissatge); // Guardar en Firebase
+        formulariChat.reset();
+      }
+    });
+
+    // Función para añadir un mensaje al DOM con votos
+    function afegirMissatgeALaLlista(missatge) {
+      const nouMissatge = document.createElement('li');
+      nouMissatge.innerHTML = `
+        <p>${missatge.cos}</p>
+        <p>Vots: <span class="vots">${missatge.vots || 0}</span></p>
+        <button class="votar-missatge">Votar per eliminar</button>
+      `;
+
+      // Añadir evento para votar
+      nouMissatge.querySelector('.votar-missatge').addEventListener('click', () => {
+        votarMissatge(missatge.id, missatge.vots || 0);
+      });
+
+      llistaMissatges.appendChild(nouMissatge);
+    }
+
+    // Función para votar un mensaje
+    function votarMissatge(id, votsActuals) {
+      const nousVots = votsActuals + 1;
+      firebase.database().ref(`missatges/${id}`).update({ vots: nousVots });
+
+      // Si los votos alcanzan 3, eliminar el mensaje
+      if (nousVots >= 3) {
+        eliminarMissatge(id);
+      }
+    }
+
+    // Eliminar un mensaje de Firebase
+    function eliminarMissatge(id) {
+      firebase.database().ref(`missatges/${id}`).remove();
+    }
+
+    // Función para eliminar todos los mensajes del chat
+    function eliminarTodosLosMensajes() {
+      firebase.database().ref('missatges').remove(); // Elimina todos los mensajes de Firebase
+      llistaMissatges.innerHTML = ''; // Limpia la lista en el DOM
+    }
+
+    // Añadir evento al botón "Eliminar Todo"
+    document.getElementById('eliminar-tots-missatges').addEventListener('click', () => {
+      if (confirm('¿Estás seguro de que deseas eliminar todos los mensajes?')) {
+        eliminarTodosLosMensajes();
+      }
+    });
+
+    // Funcionalidad del mapa interactivo
+    const mapImage = document.getElementById("map-image");
+    const mapContainer = document.getElementById("map-container");
+    let scale = 1;
+
+    // Función para hacer zoom
+    document.getElementById("zoom-in").addEventListener("click", () => {
+      scale += 0.2;
+      mapImage.style.transform = `scale(${scale})`;
+    });
+
+    document.getElementById("zoom-out").addEventListener("click", () => {
+      if (scale > 1) {
+        scale -= 0.2;
+        mapImage.style.transform = `scale(${scale})`;
+      }
+    });
+
+    // Añadir marcador al hacer clic
+    mapContainer.addEventListener("click", (event) => {
+      const rect = mapContainer.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      const marker = document.createElement("div");
+      marker.style.position = "absolute";
+      marker.style.width = "10px";
+      marker.style.height = "10px";
+      marker.style.backgroundColor = "red";
+      marker.style.borderRadius = "50%";
+      marker.style.left = `${x}px`;
+      marker.style.top = `${y}px`;
+      mapContainer.appendChild(marker);
+    });
   </script>
 </body>
 </html>
+``` 
